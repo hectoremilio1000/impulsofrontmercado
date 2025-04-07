@@ -20,7 +20,7 @@ function ForbiddenPage() {
   return (
     <div>
       <h2>403 - Acceso prohibido</h2>
-      <p>No tienes permisos para acceder a esta sección.</p>
+      <p>No tienes permisos para acceder a esta sección .</p>
     </div>
   );
 }
