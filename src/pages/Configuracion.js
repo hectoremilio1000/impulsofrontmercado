@@ -1,7 +1,7 @@
 import React from "react";
 
 const Configuracion = () => {
-  return <div>Configuracion</div>;
+  return <div>Configuracion final</div>;
 };
 
 export default Configuracion;
