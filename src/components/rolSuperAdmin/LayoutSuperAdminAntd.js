@@ -54,6 +54,12 @@ export default function LayoutSuperAdminAntd() {
       label: "Compañías",
       onClick: () => navigate("/companies"),
     },
+    {
+      key: "/posiciones",
+      icon: <ApartmentOutlined />,
+      label: "Posiciones",
+      onClick: () => navigate("/posiciones"),
+    },
 
     {
       key: "/modules",
@@ -172,7 +178,7 @@ export default function LayoutSuperAdminAntd() {
         {
           key: "/listadmin",
           icon: <UserSwitchOutlined />,
-          label: "CheckListSuperAdmin",
+          label: "CheckList",
           onClick: () => navigate("/listadmin"),
         },
       ],

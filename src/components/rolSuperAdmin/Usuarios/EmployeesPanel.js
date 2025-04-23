@@ -15,27 +15,16 @@ function EmployeesPanel({ companyId }) {
   const [editItem, setEditItem] = useState(null);
   const [form] = Form.useForm();
 
+  // Estado local para positions (catalogo desde DB)
+  const [positions, setPositions] = useState([]);
+
   // Catálogo local de puestos
-  const positions = [
-    { id: 2, nombre: "Mesero" },
-    { id: 3, nombre: "Gerente" },
-    { id: 31, nombre: "Subgerente" },
-    { id: 32, nombre: "Barman" },
-    { id: 33, nombre: "Backbar" },
-    { id: 34, nombre: "Jefe de Barra" },
-    { id: 35, nombre: "Cocinero" },
-    { id: 36, nombre: "Lavaloza" },
-    { id: 37, nombre: "Ayudante de Cocina" },
-    { id: 38, nombre: "Subjefe de Cocina" },
-    { id: 39, nombre: "Jefe de Cocina" },
-    { id: 40, nombre: "Capitán" },
-    { id: 41, nombre: "Garrotero" },
-  ];
 
   useEffect(() => {
     if (companyId) {
       fetchEmployees();
     }
+    fetchPositions();
   }, [companyId]);
 
   const fetchEmployees = async () => {
@@ -56,6 +45,18 @@ function EmployeesPanel({ companyId }) {
     }
   };
 
+  const fetchPositions = async () => {
+    try {
+      const resp = await axios.get(`${apiUrl}/positions`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      setPositions(resp.data.data || []);
+    } catch (error) {
+      console.error(error);
+      message.error("No se pudieron cargar las posiciones");
+    }
+  };
+
   const handleCreate = () => {
     setEditItem(null);
     form.resetFields();
@@ -64,7 +65,12 @@ function EmployeesPanel({ companyId }) {
 
   const handleEdit = (employee) => {
     setEditItem(employee);
-    form.setFieldsValue(employee);
+    // Ojo: el "value" esperado es positionId, pero en "employee.position" viene el objeto precargado
+    // Si tu API precarga => employee.position.id, ajusta a { positionId: employee.position?.id }
+    form.setFieldsValue({
+      ...employee,
+      positionId: employee.position ? employee.position.id : null,
+    });
     setIsModalOpen(true);
   };
 
@@ -132,7 +138,11 @@ function EmployeesPanel({ companyId }) {
     { title: "Nombre", dataIndex: "name" },
     { title: "Email", dataIndex: "email" },
     { title: "Teléfono", dataIndex: "phone" },
-    { title: "Puesto", dataIndex: "position" },
+    {
+      title: "Puesto",
+      dataIndex: "position", // La API de EmployeesController preload('position')
+      render: (pos) => pos?.nombre || "-", // pos es un objeto con {id, nombre, ...}
+    },
     {
       title: "Acciones",
       render: (_, record) => (
@@ -195,10 +205,10 @@ function EmployeesPanel({ companyId }) {
             <Input />
           </Form.Item>
 
-          <Form.Item name="position" label="Puesto">
+          <Form.Item name="positionId" label="Puesto">
             <Select placeholder="Selecciona el puesto">
               {positions.map((pos) => (
-                <Select.Option key={pos.id} value={pos.nombre}>
+                <Select.Option key={pos.id} value={pos.id}>
                   {pos.nombre}
                 </Select.Option>
               ))}

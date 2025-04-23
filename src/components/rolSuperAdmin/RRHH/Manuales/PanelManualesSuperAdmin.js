@@ -1,19 +1,31 @@
 import React, { useState } from "react";
-import { Select, Button, Table, Modal, Menu, Dropdown } from "antd";
+import {
+  Select,
+  Button,
+  Table,
+  Modal,
+  Menu,
+  Dropdown,
+  message,
+  Spin,
+} from "antd";
 import { EllipsisOutlined } from "@ant-design/icons";
 import { useAuth } from "../../../AuthContext";
 import { FetchPanelManuales } from "./FetchPanelManuales";
+import ManualModal from "./ManualModal";
+import axios from "axios";
 
-// Asumiendo que quieres mostrar las columnas: ID, Título, Puesto, Acciones
 const { Option } = Select;
 
-function PanelManualesSuperAdmin() {
+export default function PanelManualesSuperAdmin() {
   const { auth } = useAuth();
-  const token = auth?.token;
   const apiUrl = process.env.REACT_APP_API_URL;
 
+  /* ------------------------------------------------------------------ */
+  /*  Hook con toda la lógica de obtención                              */
+  /* ------------------------------------------------------------------ */
   const {
-    // Selección
+    // Selecciones
     selectedUserId,
     setSelectedUserId,
     selectedCompanyId,
@@ -27,51 +39,104 @@ function PanelManualesSuperAdmin() {
     positions,
     manuals,
 
-    // Loading
+    // Estado
     loading,
+
+    // Refetch
+    fetchManuals,
   } = FetchPanelManuales();
 
-  // Estado para “Ver Manual” en un modal
+  /* ------------------------------------------------------------------ */
+  /*  Estado Modal                                                      */
+  /* ------------------------------------------------------------------ */
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMode, setModalMode] = useState("view"); // view | edit | create
   const [manualSelected, setManualSelected] = useState(null);
-  const [modalVerManualVisible, setModalVerManualVisible] = useState(false);
 
-  /**
-   * Ejemplo de funciones para Editar / Eliminar:
-   */
+  /* ------------------------  ACCIONES TABLA  ------------------------ */
+  const handleView = (manual) => {
+    setManualSelected(manual);
+    setModalMode("view");
+    setModalVisible(true);
+  };
+
   const handleEdit = (manual) => {
-    console.log("Editar manual => ", manual);
-    // Aquí tu lógica: abrir un modal, o hacer PUT /training-manuals/:id, etc.
+    setManualSelected(manual);
+    setModalMode("edit");
+    setModalVisible(true);
   };
 
   const handleDelete = (manual) => {
-    console.log("Eliminar manual => ", manual);
-    // Aquí tu lógica: confirm, luego DELETE /training-manuals/:id, etc.
+    Modal.confirm({
+      title: "¿Eliminar manual?",
+      content: "Esta acción no se puede deshacer",
+      okText: "Sí, eliminar",
+      cancelText: "Cancelar",
+      onOk: async () => {
+        try {
+          await axios.delete(`${apiUrl}/training-manuals/${manual.id}`, {
+            headers: { Authorization: `Bearer ${auth.token}` },
+          });
+          message.success("Manual eliminado");
+          fetchManuals();
+        } catch (err) {
+          console.error(err);
+          message.error("No se pudo eliminar");
+        }
+      },
+    });
   };
 
-  // Columnas de la tabla de manuales
+  const handleCreate = () => {
+    setManualSelected(null);
+    setModalMode("create");
+    setModalVisible(true);
+  };
+
+  /* -------------------------  GUARDAR (edit/create) ----------------- */
+  const saveManual = async (values) => {
+    try {
+      if (modalMode === "edit") {
+        await axios.put(
+          `${apiUrl}/training-manuals/${manualSelected.id}`,
+          values,
+          { headers: { Authorization: `Bearer ${auth.token}` } }
+        );
+        message.success("Manual actualizado");
+      } else {
+        await axios.post(`${apiUrl}/training-manuals`, values, {
+          headers: { Authorization: `Bearer ${auth.token}` },
+        });
+        message.success("Manual creado");
+      }
+      setModalVisible(false);
+      fetchManuals();
+    } catch (err) {
+      console.error(err);
+      message.error("Error guardando manual");
+    }
+  };
+
+  /* -------------------------  Columnas de tabla --------------------- */
   const columns = [
+    {
+      title: "Compañía",
+      key: "company",
+      render: (_, record) =>
+        record.company ? record.company.name : "Sin compañía",
+    },
     {
       title: "Puesto",
       key: "puesto",
       render: (_, record) =>
         record.position ? record.position.nombre : "Sin puesto",
     },
-    {
-      title: "Manual ID",
-      dataIndex: "id",
-      key: "id",
-    },
-    {
-      title: "Título",
-      dataIndex: "title",
-      key: "title",
-    },
-
+    { title: "Manual ID", dataIndex: "id", key: "id" },
+    { title: "Título", dataIndex: "title", key: "title" },
     {
       title: "Acciones",
       key: "acciones",
-      render: (text, record) => {
-        // Menú de opciones (Editar/Eliminar)
+      render: (_, record) => {
         const menu = (
           <Menu>
             <Menu.Item key="edit" onClick={() => handleEdit(record)}>
@@ -85,18 +150,9 @@ function PanelManualesSuperAdmin() {
 
         return (
           <>
-            {/* Botón para "Ver" modal */}
-            <Button
-              size="small"
-              onClick={() => {
-                setManualSelected(record);
-                setModalVerManualVisible(true);
-              }}
-            >
+            <Button size="small" onClick={() => handleView(record)}>
               Ver
             </Button>
-
-            {/* Triple puntitos */}
             <Dropdown overlay={menu} trigger={["click"]}>
               <Button size="small" style={{ marginLeft: 8 }}>
                 <EllipsisOutlined />
@@ -108,12 +164,14 @@ function PanelManualesSuperAdmin() {
     },
   ];
 
+  /* ------------------------------  RENDER --------------------------- */
   return (
     <div>
       <h3>Filtrar Manuales por Usuario → Empresa → Puesto</h3>
 
+      {/* ---------------------- FILTROS ------------------------------ */}
       <div style={{ display: "flex", gap: 16, marginBottom: 16 }}>
-        {/* Select de usuarios con rol=2 */}
+        {/* USUARIOS (rol=2) */}
         <div>
           <label>Cliente:</label>
           <br />
@@ -132,7 +190,7 @@ function PanelManualesSuperAdmin() {
           </Select>
         </div>
 
-        {/* Select de Empresas del usuario elegido */}
+        {/* EMPRESAS */}
         <div>
           <label>Empresa:</label>
           <br />
@@ -152,7 +210,7 @@ function PanelManualesSuperAdmin() {
           </Select>
         </div>
 
-        {/* Select de Puestos de la empresa seleccionada */}
+        {/* PUESTOS */}
         <div>
           <label>Puesto:</label>
           <br />
@@ -171,37 +229,36 @@ function PanelManualesSuperAdmin() {
             ))}
           </Select>
         </div>
+
+        {/* BOTÓN NUEVO MANUAL */}
+        {/* <div style={{ marginLeft: "auto" }}>
+          <Button type="primary" onClick={handleCreate}>
+            Nuevo Manual
+          </Button>
+        </div> */}
       </div>
 
-      {/* Tabla con manuales */}
-      <Table
-        style={{ marginTop: 16 }}
-        rowKey="id"
-        columns={columns}
-        dataSource={manuals}
-        loading={loading}
-      />
+      {/* ---------------------- TABLA ------------------------------- */}
+      {loading ? (
+        <Spin />
+      ) : (
+        <Table
+          rowKey="id"
+          columns={columns}
+          dataSource={manuals}
+          pagination={{ pageSize: 10 }}
+        />
+      )}
 
-      {/* Modal: Ver Manual (contenido) */}
-      <Modal
-        title={manualSelected?.title}
-        visible={modalVerManualVisible}
-        onCancel={() => setModalVerManualVisible(false)}
-        footer={null}
-      >
-        {manualSelected && (
-          <div>
-            <p>
-              <strong>ID:</strong> {manualSelected.id}
-            </p>
-            <p>
-              <strong>Contenido:</strong> {manualSelected.content}
-            </p>
-          </div>
-        )}
-      </Modal>
+      {/* ---------------------- MODAL  ------------------------------ */}
+      <ManualModal
+        visible={modalVisible}
+        mode={modalMode}
+        manual={manualSelected}
+        positions={positions}
+        onCancel={() => setModalVisible(false)}
+        onSave={saveManual}
+      />
     </div>
   );
 }
-
-export default PanelManualesSuperAdmin;

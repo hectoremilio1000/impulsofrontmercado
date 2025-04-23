@@ -47,6 +47,9 @@ import Modules from "./pages/superadmin/Moduls/Modules";
 //COMPAÑIAS
 import Companies from "./pages/superadmin/Companies/Companies";
 
+//COMPAÑIAS
+import Posiciones from "./pages/superadmin/Posiciones/Posiciones";
+
 //MODULO AYUDA IA SUPERADMIN
 import AyudaIA from "./pages/superadmin/Moduls/AyudaIA/AyudaIA";
 import RecomendacionAI from "./pages/superadmin/Moduls/AyudaIA/Recomendacion";
@@ -67,7 +70,7 @@ import ContratacionesRRHH from "./pages/superadmin/Moduls/RRHH/Contrataciones/Co
 import ExamenesRRHH from "./pages/superadmin/Moduls/RRHH/Empleados/ExamenesRRHH";
 import ResultadosRRHH from "./pages/superadmin/Moduls/RRHH/ResultadosExamenes/ResultadosRRHH";
 import ManualesRRHH from "./pages/superadmin/Moduls/RRHH/Manuales/PanelManualesRRHH";
-import PanelCheckListSuperAdmin from "./pages/superadmin/Moduls/RRHH/CheckList/CheckListSuperAdmin";
+import PanelCheckListSuperAdmin from "./pages/superadmin/Moduls/RRHH/CheckList/PanelChecklistsRRHH";
 
 import TrainingIndexRRHH from "./pages/superadmin/Moduls/RRHH/TrainingIndexRRHH";
 import TrainingPathsListRRHH from "./pages/superadmin/Moduls/RRHH/TrainingPathsListRRHH";
@@ -397,6 +400,9 @@ function App() {
 
               {/* COMPAÑÍAS */}
               <Route path="/companies" element={<Companies />} />
+
+              {/* COMPAÑÍAS */}
+              <Route path="/posiciones" element={<Posiciones />} />
 
               {/* LISTA MÓDULOS*/}
               <Route path="/modules" element={<Modules />} />

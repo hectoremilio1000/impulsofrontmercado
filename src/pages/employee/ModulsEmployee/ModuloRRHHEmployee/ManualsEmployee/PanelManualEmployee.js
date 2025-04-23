@@ -110,18 +110,16 @@ function PanelManualEmployee() {
       {/* Modal para Ver Manual */}
       <Modal
         title={manualSelected?.title}
-        visible={modalVisible}
+        open={modalVisible} // ⚠️ Ant D v5 usa `open`, no `visible`
         onCancel={() => setModalVisible(false)}
         footer={null}
       >
         {manualSelected && (
-          <div>
-            <p>
-              <strong>ID:</strong> {manualSelected.id}
-            </p>
-            <p>
-              <strong>Contenido:</strong> {manualSelected.content}
-            </p>
+          <div style={{ whiteSpace: "pre-wrap" }}>
+            {/* white‑space: pre‑wrap respeta \n y ajusta al ancho */}
+            <strong>ID:</strong> {manualSelected.id}
+            {"\n\n"}
+            {manualSelected.content}
           </div>
         )}
       </Modal>
