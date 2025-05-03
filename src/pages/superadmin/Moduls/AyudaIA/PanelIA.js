@@ -1,21 +1,27 @@
 // src/pages/superadmin/Moduls/AyudaIA/PanelIA.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Table, Spin, message } from "antd";
+import { Table, Spin, message, DatePicker, Space, Button } from "antd";
 import { useAuth } from "../../../../components/AuthContext";
+import dayjs from "dayjs";
+
+const { RangePicker } = DatePicker;
 
 function PanelIA() {
   const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3333";
-  const [recommendations, setRecommendations] = useState([]);
+
+  const [recommendations, setRecommendations] = useState([]); // dataset completo
+  const [filteredRecs, setFilteredRecs] = useState([]); // dataset filtrado
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [dateRange, setDateRange] = useState([]); // rango seleccionado
 
-  // 1) Obtenemos info del user (rol, id, etc.)
+  // ---- info del usuario ----------------------------------------------------
   const { auth } = useAuth();
   const currentUserId = auth.user?.id;
-  // IMPORTANTE: si el superadmin en tu DB es rol_id=1:
   const isSuperAdmin = auth.user?.rolId === 1;
 
+  // ---- carga inicial -------------------------------------------------------
   useEffect(() => {
     fetchRecommendations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -25,25 +31,25 @@ function PanelIA() {
     try {
       setLoading(true);
 
-      // Obtenemos todas las recomendaciones
       const resp = await axios.get(`${apiUrl}/recommendations`);
-
-      if (resp.data.status === "success") {
-        const allRecs = resp.data.data;
-
-        // Si es superadmin => mostrar todas
-        if (isSuperAdmin) {
-          setRecommendations(allRecs);
-        } else {
-          // Si NO es superadmin => filtrar solo las del usuario actual
-          const myRecs = allRecs.filter((rec) => rec.userId === currentUserId);
-          setRecommendations(myRecs);
-        }
-      } else {
+      if (resp.data.status !== "success")
         throw new Error(resp.data.message || "Error al cargar recomendaciones");
-      }
+
+      let recs = resp.data.data;
+
+      // filtra según rol
+      if (!isSuperAdmin) recs = recs.filter((r) => r.userId === currentUserId);
+
+      // ordena DESC por fecha de creación
+      recs.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setRecommendations(recs);
+      setFilteredRecs(recs); // muestra todo al inicio
     } catch (err) {
-      console.error("Error fetchAllRecommendations:", err);
+      console.error("Error fetchRecommendations:", err);
       setError(err.message);
       message.error(err.message);
     } finally {
@@ -51,45 +57,61 @@ function PanelIA() {
     }
   }
 
-  // Columnas de la tabla
+  // ---- filtrado por rango de fechas ---------------------------------------
+  const handleDateFilter = () => {
+    if (dateRange.length === 2) {
+      const [start, end] = dateRange;
+      const filtered = recommendations.filter((rec) => {
+        const created = dayjs(rec.createdAt);
+        return (
+          created.isAfter(start.startOf("day")) &&
+          created.isBefore(end.endOf("day"))
+        );
+      });
+      setFilteredRecs(filtered);
+    } else {
+      setFilteredRecs(recommendations);
+    }
+  };
+
+  const resetFilter = () => {
+    setDateRange([]);
+    setFilteredRecs(recommendations);
+  };
+
+  // ---- columnas de la tabla -----------------------------------------------
   const columns = [
-    { title: "ID", dataIndex: "id", key: "id", width: 80 },
+    { title: "ID", dataIndex: "id", key: "id", width: 60 },
     {
-      title: "Tipo",
-      dataIndex: "tipo",
-      key: "tipo",
-      width: 100,
+      title: "Fecha",
+      dataIndex: "fecha",
+      key: "fecha",
+      width: 150,
+      sorter: (a, b) => dayjs(a.fecha).unix() - dayjs(b.fecha).unix(),
     },
+    { title: "Tipo", dataIndex: "tipo", key: "tipo", width: 110 },
     {
       title: "Nombre",
       dataIndex: "nombre",
       key: "nombre",
-      width: 180,
-      render: (nombre) => (nombre ? nombre : "N/A"),
+      width: 200,
+      render: (nombre) => nombre || "N/A",
     },
     {
       title: "Texto",
       dataIndex: "text",
       key: "text",
-      render: (text) => (
-        <div
-          style={{
-            whiteSpace: "pre-wrap",
-            overflowY: "auto",
-          }}
-        >
-          {text}
-        </div>
+      render: (txt) => (
+        <div style={{ whiteSpace: "pre-wrap", overflowY: "auto" }}>{txt}</div>
       ),
     },
   ];
 
-  // Mapeo de recomendations al dataSource
-  const dataSource = recommendations.map((rec) => {
+  // ---- transforma recs -> dataSource --------------------------------------
+  const dataSource = filteredRecs.map((rec) => {
     let tipo = "Desconocido";
     let nombre = "";
 
-    // Ajustar a firstName/lastName (tal como vienen en tu JSON)
     if (rec.prospectId && rec.prospect) {
       tipo = "Prospecto";
       const { firstName, lastName } = rec.prospect;
@@ -104,27 +126,42 @@ function PanelIA() {
     return {
       key: rec.id,
       id: rec.id,
+      fecha: dayjs(rec.createdAt).format("YYYY-MM-DD HH:mm"),
       tipo,
       nombre,
       text: rec.text,
     };
   });
 
-  if (loading) {
+  // ---- estados de carga / error -------------------------------------------
+  if (loading)
     return (
       <div className="flex justify-center items-center py-10">
         <Spin size="large" tip="Cargando recomendaciones..." />
       </div>
     );
-  }
 
-  if (error) {
-    return <p className="text-red-600">{error}</p>;
-  }
+  if (error) return <p className="text-red-600">{error}</p>;
 
+  // ---- render --------------------------------------------------------------
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-6">Panel IA - Recomendaciones</h1>
+      <h1 className="text-2xl font-bold mb-4">Panel IA – Recomendaciones</h1>
+
+      {/* ---------- filtro de fechas ---------- */}
+      <Space className="mb-4" size="middle">
+        <RangePicker
+          value={dateRange}
+          onChange={(vals) => setDateRange(vals || [])}
+          format="YYYY-MM-DD"
+        />
+        <Button type="primary" onClick={handleDateFilter}>
+          Filtrar
+        </Button>
+        <Button onClick={resetFilter}>Reset</Button>
+      </Space>
+
+      {/* ------------- tabla ------------------ */}
       <Table
         columns={columns}
         dataSource={dataSource}
