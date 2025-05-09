@@ -176,6 +176,7 @@ import HomeEmployee from "./pages/employee/HomeEmployee";
 import LayoutEmployeAntd from "./components/rolEmployee/LayoutEmployeeAntd";
 import PanelManualEmployee from "./pages/employee/ModulsEmployee/ModuloRRHHEmployee/ManualsEmployee/PanelManualEmployee";
 import Checklist from "./pages/employee/ModulsEmployee/Tareas/Checklist";
+import DashboardVentasSoft from "./pages/superadmin/Moduls/PuntoVenta/DashboardVentasSoft";
 
 function App() {
   console.log("[App.js] Renderizando App principal...");
@@ -427,12 +428,13 @@ function App() {
               <Route path="/panelmarketing" element={<PanelMarketing />} />
               <Route path="/ticketsmarketing" element={<TicketsMarketing />} />
 
-              {/* MÓDULO PUNTO DE VENTA */}
+              {/* MÓDULO PUNTO DE VENTA Super admin */}
               <Route path="/panelpuntoVenta" element={<PanelPuntoVenta />} />
               <Route
                 path="/ticketspuntoventa"
                 element={<TicketsPuntoVenta />}
               />
+              <Route path="/dashboardpunto" element={<DashboardVentasSoft />} />
 
               {/* MÓDULO RRHH SUPERADMIN*/}
               <Route path="/panelrrhh" element={<PanelRRHH />} />

@@ -24,7 +24,7 @@
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "react-to-print": "^3.0.5",
-    "recharts": "^2.15.1",
+    "recharts": "^2.15.3",
     "swiper": "^11.1.4",
     "tailwindcss": "^3.4.4",
     "web-vitals": "^2.1.4",

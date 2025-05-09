@@ -144,6 +144,12 @@ export default function LayoutSuperAdminAntd() {
           label: "Tickets Punto Venta",
           onClick: () => navigate("/ticketspuntoventa"),
         },
+        {
+          key: "/dashboardpunto",
+          icon: <ShopOutlined />,
+          label: "Dashboard",
+          onClick: () => navigate("/dashboardpunto"),
+        },
       ],
     },
     {
