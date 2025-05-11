@@ -31,6 +31,7 @@ export default function PanelLealtad() {
   const [createCardModal, setCreateCardModal] = useState({
     visible: false,
     programId: null,
+    ownerId: null,
   });
 
   const apiUrl = process.env.REACT_APP_API_URL;
@@ -333,7 +334,11 @@ export default function PanelLealtad() {
             <Menu.Item
               key="createCard"
               onClick={() =>
-                setCreateCardModal({ visible: true, programId: record.id })
+                setCreateCardModal({
+                  visible: true,
+                  programId: record.id,
+                  ownerId: record.userId || record.owner?.id, // 🆕
+                })
               }
             >
               Crear Tarjeta
@@ -399,6 +404,7 @@ export default function PanelLealtad() {
           {/* Modal para crear Tarjeta */}
           <CrearTarjetaModal
             programId={createCardModal.programId}
+            ownerId={createCardModal.ownerId}
             visible={createCardModal.visible}
             onClose={() =>
               setCreateCardModal({ visible: false, programId: null })
