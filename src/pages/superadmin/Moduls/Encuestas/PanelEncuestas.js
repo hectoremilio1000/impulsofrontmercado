@@ -31,7 +31,7 @@ export default function PanelEncuestas() {
   const [surveyToPrint, setSurveyToPrint] = useState(null);
   const contentRef = useRef(null);
   const handlePrint = useReactToPrint({
-    content: () => contentRef.current,
+    contentRef,
     documentTitle: "Encuesta",
     onAfterPrint: () => setSurveyToPrint(null),
   });

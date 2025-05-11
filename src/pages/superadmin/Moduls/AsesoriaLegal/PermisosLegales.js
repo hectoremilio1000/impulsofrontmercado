@@ -280,7 +280,7 @@ function PermisosLegales() {
         style={{ marginBottom: 16 }}
         onClick={() => setIsModalOpen(true)}
       >
-        Nuevo Permiso
+        Ingresar información de nuevos Permisos
       </Button>
 
       <Table
