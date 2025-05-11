@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../../../../../components/AuthContext";
-import { Button, Spin, Typography, Card, Radio, Divider } from "antd";
+import { Button, Spin, Typography, Card, Radio, Divider, message } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -23,6 +23,7 @@ function ExamenesRRHH() {
   const [loading, setLoading] = useState(true);
   const [preguntas, setPreguntas] = useState([]);
   const [respuestas, setRespuestas] = useState({});
+  const [submitting, setSubmitting] = useState(false);
 
   // IDs de exámenes psico => ajusta si cambian
   const psicoIds = [49, 50, 51, 52, 53, 54, 55];
@@ -94,6 +95,7 @@ function ExamenesRRHH() {
   };
 
   const handleFinalizar = async () => {
+    setSubmitting(true);
     try {
       // 1) Guardar respuestas en masivo
       const payload = {
@@ -135,20 +137,24 @@ function ExamenesRRHH() {
         );
 
         if (resCalc.data.status === "success") {
-          alert("Examen finalizado y resultados calculados con éxito");
+          message.success(
+            "Examen finalizado y resultados calculados con éxito"
+          );
           navigate("/examenesresultadosrrhh");
         } else {
           console.error("Error calculando resultados:", resCalc.data);
-          alert("Error al calcular resultados");
+          message.error("Error al calcular resultados");
         }
       } else {
         console.error("Error guardando respuestas:", resResp.data);
-        alert("Error al guardar respuestas");
+        message.error("Error al guardar respuestas");
       }
     } catch (error) {
       console.error("Error en handleFinalizar:", error);
-      alert("Error crítico al finalizar examen");
+      message.error("Error crítico al finalizar examen");
+    } finally {
     }
+    setSubmitting(false);
   };
 
   if (loading) {
@@ -164,87 +170,95 @@ function ExamenesRRHH() {
   }
 
   return (
-    <div style={{ padding: 20 }}>
-      <Title level={3}>
-        Examen para Candidato ID {candidateId}, puesto {puesto}
-      </Title>
+    <Spin spinning={submitting} tip="Procesando tus respuestas…">
+      <div style={{ padding: 20 }}>
+        <Title level={3}>
+          Examen para Candidato ID {candidateId}, puesto {puesto}
+        </Title>
 
-      {/* Bloque Psicométricas */}
-      <Divider>Preguntas Psicométricas</Divider>
-      {preguntasPsico.length === 0 ? (
-        <Text type="secondary">
-          No hay preguntas psicométricas para este puesto.
-        </Text>
-      ) : (
-        preguntasPsico.map((preg, index) => (
-          <Card
-            key={preg.id}
-            style={{ marginBottom: 16 }}
-            title={`${index + 1}. ${preg.texto}`}
-          >
-            <Radio.Group
-              value={respuestas[preg.id] || ""}
-              onChange={(e) => handleSeleccion(preg.id, e.target.value)}
+        {/* Bloque Psicométricas */}
+        <Divider>Preguntas Psicométricas</Divider>
+        {preguntasPsico.length === 0 ? (
+          <Text type="secondary">
+            No hay preguntas psicométricas para este puesto.
+          </Text>
+        ) : (
+          preguntasPsico.map((preg, index) => (
+            <Card
+              key={preg.id}
+              style={{ marginBottom: 16 }}
+              title={`${index + 1}. ${preg.texto}`}
             >
-              {["a", "b", "c", "d", "e"].map((opcion) => {
-                const texto = preg[opcion];
-                if (!texto) return null;
-                return (
-                  <Radio
-                    key={opcion}
-                    value={opcion}
-                    style={{ display: "block", marginBottom: 6 }}
-                  >
-                    <strong>{opcion.toUpperCase()}:</strong> {texto}
-                  </Radio>
-                );
-              })}
-            </Radio.Group>
-          </Card>
-        ))
-      )}
+              <Radio.Group
+                value={respuestas[preg.id] || ""}
+                onChange={(e) => handleSeleccion(preg.id, e.target.value)}
+              >
+                {["a", "b", "c", "d", "e"].map((opcion) => {
+                  const texto = preg[opcion];
+                  if (!texto) return null;
+                  return (
+                    <Radio
+                      key={opcion}
+                      value={opcion}
+                      style={{ display: "block", marginBottom: 6 }}
+                    >
+                      <strong>{opcion.toUpperCase()}:</strong> {texto}
+                    </Radio>
+                  );
+                })}
+              </Radio.Group>
+            </Card>
+          ))
+        )}
 
-      {/* Bloque Conocimientos */}
-      <Divider>Preguntas de Conocimiento</Divider>
-      {preguntasConocimiento.length === 0 ? (
-        <Text type="secondary">
-          No hay preguntas de conocimiento para este puesto.
-        </Text>
-      ) : (
-        preguntasConocimiento.map((preg, index) => (
-          <Card
-            key={preg.id}
-            style={{ marginBottom: 16 }}
-            title={`${index + 1}. ${preg.texto}`}
-          >
-            <Radio.Group
-              value={respuestas[preg.id] || ""}
-              onChange={(e) => handleSeleccion(preg.id, e.target.value)}
+        {/* Bloque Conocimientos */}
+        <Divider>Preguntas de Conocimiento</Divider>
+        {preguntasConocimiento.length === 0 ? (
+          <Text type="secondary">
+            No hay preguntas de conocimiento para este puesto.
+          </Text>
+        ) : (
+          preguntasConocimiento.map((preg, index) => (
+            <Card
+              key={preg.id}
+              style={{ marginBottom: 16 }}
+              title={`${index + 1}. ${preg.texto}`}
             >
-              {["a", "b", "c", "d", "e"].map((opcion) => {
-                const texto = preg[opcion];
-                if (!texto) return null;
-                return (
-                  <Radio
-                    key={opcion}
-                    value={opcion}
-                    style={{ display: "block", marginBottom: 6 }}
-                  >
-                    <strong>{opcion.toUpperCase()}:</strong> {texto}
-                  </Radio>
-                );
-              })}
-            </Radio.Group>
-          </Card>
-        ))
-      )}
+              <Radio.Group
+                value={respuestas[preg.id] || ""}
+                onChange={(e) => handleSeleccion(preg.id, e.target.value)}
+              >
+                {["a", "b", "c", "d", "e"].map((opcion) => {
+                  const texto = preg[opcion];
+                  if (!texto) return null;
+                  return (
+                    <Radio
+                      key={opcion}
+                      value={opcion}
+                      style={{ display: "block", marginBottom: 6 }}
+                    >
+                      <strong>{opcion.toUpperCase()}:</strong> {texto}
+                    </Radio>
+                  );
+                })}
+              </Radio.Group>
+            </Card>
+          ))
+        )}
 
-      <div style={{ textAlign: "right", marginTop: 24 }}>
-        <Button type="primary" size="large" onClick={handleFinalizar}>
-          Finalizar Examen
-        </Button>
+        <div style={{ textAlign: "right", marginTop: 24 }}>
+          <Button
+            type="primary"
+            size="large"
+            onClick={handleFinalizar}
+            disabled={submitting} // 🔹 evita doble clic
+          >
+            Finalizar Examen
+          </Button>
+        </div>
       </div>
-    </div>
+      +{" "}
+    </Spin>
   );
 }
 

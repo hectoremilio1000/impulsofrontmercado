@@ -33,7 +33,8 @@ function ContratacionesRRHH() {
   const [showCreateCompanyModal, setShowCreateCompanyModal] = useState(false);
 
   // Campos del formulario "Candidate"
-  const [position, setPosition] = useState("");
+  const [positionId, setPositionId] = useState(null); // ⭐ ahora numérico
+  const [positions, setPositions] = useState([]);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [email, setEmail] = useState("");
@@ -48,6 +49,29 @@ function ContratacionesRRHH() {
   const [ref2Timeworked, setRef2Timeworked] = useState("");
   const [ref2Whatsapp, setRef2Whatsapp] = useState("");
   const [cvFile, setCvFile] = useState(null);
+
+  useEffect(() => {
+    fetchPositions(); // ⭐ catálogo
+    if (isSuperadmin) {
+      fetchUsers();
+    } else {
+      setSelectedUserId(auth.user?.id || null);
+      fetchCompaniesForCurrentUser();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const fetchPositions = async () => {
+    try {
+      const res = await axios.get(`${apiUrl}/positions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPositions(res.data.data || []);
+    } catch (err) {
+      console.error("Error al cargar positions:", err);
+      message.error("No se pudo cargar la lista de puestos");
+    }
+  };
 
   useEffect(() => {
     if (isSuperadmin) {
@@ -160,7 +184,7 @@ function ContratacionesRRHH() {
   //  SUBMIT CANDIDATO
   // ----------------------------------------------------------------
   const handleSubmit = async () => {
-    if (!position || !name || !whatsapp || !email) {
+    if (!positionId || !name || !whatsapp || !email) {
       message.warning("Por favor completa los campos requeridos");
       return;
     }
@@ -179,7 +203,7 @@ function ContratacionesRRHH() {
       formData.append("nombre", name);
       formData.append("whatsapp", whatsapp);
       formData.append("email", email);
-      formData.append("puesto", position);
+      formData.append("position_id", positionId);
 
       // Referencias 1
       formData.append("referencia1_empresa", ref1Company);
@@ -221,7 +245,7 @@ function ContratacionesRRHH() {
   };
 
   const resetForm = () => {
-    setPosition("");
+    setPositionId(null);
     setName("");
     setWhatsapp("");
     setEmail("");
@@ -307,16 +331,15 @@ function ContratacionesRRHH() {
         {/* 3) Datos del Candidato */}
         <Form.Item label="Puesto a contratar" required>
           <Select
-            value={position}
-            onChange={(val) => setPosition(val)}
+            value={positionId}
+            onChange={setPositionId} // ⭐ guarda ID
             placeholder="Selecciona un puesto"
           >
-            <Option value="Mesero">Mesero</Option>
-            <Option value="Gerente">Gerente</Option>
-            <Option value="Barman">Barman</Option>
-            <Option value="Cocinero">Cocinero</Option>
-            <Option value="Lavaloza">Lavaloza</Option>
-            <Option value="Ayudante de Cocina">Ayudante de Cocina</Option>
+            {positions.map((p) => (
+              <Option key={p.id} value={p.id}>
+                {p.nombre}
+              </Option>
+            ))}
           </Select>
         </Form.Item>
 

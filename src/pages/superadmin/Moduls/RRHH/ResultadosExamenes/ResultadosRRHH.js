@@ -147,6 +147,21 @@ function ResultadosRRHH() {
       dataIndex: "puesto",
     },
     {
+      title: "Fecha examen",
+      dataIndex: "createdAt", // ← vendrá del backend
+      width: 160,
+      render: (val) =>
+        val
+          ? new Date(val).toLocaleDateString("es-MX", {
+              year: "numeric",
+              month: "numeric",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "—",
+    },
+    {
       title: "Bondad",
       dataIndex: "puntajeBondad",
     },

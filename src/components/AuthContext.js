@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       const res = await axios.post(`${apiUrl}/login`, { email, password });
       const data = res.data;
       // res.data => { status: 'success', token: '...', expires_at: '...' }
-      console.log("[AuthContext] login() => Respuesta del servidor:", data);
+      // console.log("[AuthContext] login() => Respuesta del servidor:", data);
 
       // Guardar token en sessionStorage
       sessionStorage.setItem("token", data.token);
@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
       // Llamar fetchMe para poblar auth.user
       await fetchMe(data.token);
 
-      console.log("[AuthContext] login() => Login finalizado OK.");
+      // console.log("[AuthContext] login() => Login finalizado OK.");
       return { success: true };
     } catch (error) {
       console.error("[AuthContext] login() => Error en login:", error);

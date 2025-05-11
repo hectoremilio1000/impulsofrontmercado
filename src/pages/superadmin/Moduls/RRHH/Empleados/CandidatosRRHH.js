@@ -107,12 +107,13 @@ function CandidatosRRHH() {
   // Cambiar estado del candidato
   const handleEstadoChange = async (candidate, newEstado) => {
     if (newEstado === "Start Exam") {
+      const puesto = candidate.positionName || "";
       try {
         const res = await axios.post(
           `${apiUrl}/rrhh/preguntas/iniciar-examen`,
           {
             candidatoId: candidate.id,
-            puesto: candidate.position,
+            puesto,
             etapa: "psicométricos", // ajusta según tu backend
           },
           {
@@ -123,7 +124,9 @@ function CandidatosRRHH() {
           const data = res.data;
           // data.intentoId -> "intento-12345"
           navigate(
-            `/examenesrrhh/${candidate.id}?intentoId=${data.intentoId}&puesto=${candidate.position}`
+            `/examenesrrhh/${candidate.id}?intentoId=${
+              data.intentoId
+            }&puesto=${encodeURIComponent(puesto)}`
           );
         } else {
           message.error("No se pudo iniciar el examen");
@@ -166,7 +169,10 @@ function CandidatosRRHH() {
     if (selectedUserFilter && cand.user_id !== selectedUserFilter) {
       return false;
     }
-    if (selectedPositionFilter && cand.position !== selectedPositionFilter) {
+    if (
+      selectedPositionFilter &&
+      cand.positionName !== selectedPositionFilter
+    ) {
       return false;
     }
     return true;
@@ -188,7 +194,7 @@ function CandidatosRRHH() {
     },
     {
       title: "Puesto",
-      dataIndex: "position",
+      dataIndex: "positionName",
       width: 140,
       fixed: "left",
     },
