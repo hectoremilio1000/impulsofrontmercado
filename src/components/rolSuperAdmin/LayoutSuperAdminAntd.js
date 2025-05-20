@@ -71,7 +71,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub1",
       icon: <AppstoreOutlined />,
-      label: "Módulo IA",
+      label: "Ayuda IA",
       children: [
         {
           key: "/superadmin/panelia",
@@ -90,7 +90,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub2",
       icon: <AppstoreOutlined />,
-      label: "Módulo Web",
+      label: "Web",
       children: [
         {
           key: "/panelweb",
@@ -111,7 +111,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub3",
       icon: <AppstoreOutlined />,
-      label: "Módulo Marketing",
+      label: "Marketing",
       children: [
         {
           key: "/panelmarketing",
@@ -130,7 +130,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub4",
       icon: <AppstoreOutlined />,
-      label: "Módulo Punto Venta",
+      label: "Punto Venta",
       children: [
         {
           key: "/punto-venta",
@@ -155,7 +155,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub5",
       icon: <AppstoreOutlined />,
-      label: "Módulo RRHH",
+      label: "RRHH",
       children: [
         {
           key: "/panelrrhh",
@@ -192,7 +192,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub6",
       icon: <AppstoreOutlined />,
-      label: "Módulo Lealtad",
+      label: "Lealtad",
       children: [
         {
           key: "/Panel-lealtad",
@@ -242,7 +242,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub8",
       icon: <AppstoreOutlined />,
-      label: "Módulo Financiamiento",
+      label: "Financiamiento",
       children: [
         {
           key: "/panelfinanciamiento",
@@ -286,7 +286,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub10",
       icon: <AppstoreOutlined />,
-      label: "Módulo Inventarios",
+      label: "Inventarios",
       children: [
         {
           key: "/panelinventarios",
@@ -311,7 +311,7 @@ export default function LayoutSuperAdminAntd() {
     {
       key: "sub11",
       icon: <AppstoreOutlined />,
-      label: "Módulo Monitoreo",
+      label: "Monitoreo",
       children: [
         {
           key: "/panelmonitoreo",
@@ -324,6 +324,25 @@ export default function LayoutSuperAdminAntd() {
           icon: <FileProtectOutlined />,
           label: "Solicitar Monitoreo",
           onClick: () => navigate("/solicitudmonitoreo"),
+        },
+      ],
+    },
+    {
+      key: "blog",
+      icon: <AppstoreOutlined />,
+      label: "Blog",
+      children: [
+        {
+          key: "/panelblog",
+          icon: <DropboxOutlined />,
+          label: "Panel Blog",
+          onClick: () => navigate("/panelblog"),
+        },
+        {
+          key: "/crearblog",
+          icon: <FileProtectOutlined />,
+          label: "Crear Blog",
+          onClick: () => navigate("/crearblog"),
         },
       ],
     },

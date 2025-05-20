@@ -177,6 +177,8 @@ import LayoutEmployeAntd from "./components/rolEmployee/LayoutEmployeeAntd";
 import PanelManualEmployee from "./pages/employee/ModulsEmployee/ModuloRRHHEmployee/ManualsEmployee/PanelManualEmployee";
 import Checklist from "./pages/employee/ModulsEmployee/Tareas/Checklist";
 import DashboardVentasSoft from "./pages/superadmin/Moduls/PuntoVenta/DashboardVentasSoft";
+import PanelBlog from "./pages/superadmin/Blog/PanelBlog";
+import CrearBlog from "./pages/superadmin/Blog/CrearBlog";
 
 function App() {
   console.log("[App.js] Renderizando App principal...");
@@ -552,6 +554,10 @@ function App() {
                 path="/solicitudmonitoreo"
                 element={<SolicitudMonitoreo />}
               />
+              {/* BLOG SUPERADMIN */}
+              <Route path="/panelblog" element={<PanelBlog />} />
+              <Route path="/crearblog" element={<CrearBlog />} />
+
               {/* PLANES*/}
               <Route path="/plans" element={<Plans />} />
               {/* PAGOS*/}

@@ -15,23 +15,9 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
   const [roles, setRoles] = useState([]);
   // Lista de empresas (se carga desde el backend)
   const [companies, setCompanies] = useState([]);
+  const [positions, setPositions] = useState([]);
 
   // Catálogo local de puestos (para rol=4 => Employee)
-  const positionsCatalog = [
-    { id: 2, nombre: "Mesero" },
-    { id: 3, nombre: "Gerente" },
-    { id: 31, nombre: "Subgerente" },
-    { id: 32, nombre: "Barman" },
-    { id: 33, nombre: "Backbar" },
-    { id: 34, nombre: "Jefe de Barra" },
-    { id: 35, nombre: "Cocinero" },
-    { id: 36, nombre: "Lavaloza" },
-    { id: 37, nombre: "Ayudante de Cocina" },
-    { id: 38, nombre: "Subjefe de Cocina" },
-    { id: 39, nombre: "Jefe de Cocina" },
-    { id: 40, nombre: "Capitán" },
-    { id: 41, nombre: "Garrotero" },
-  ];
 
   // Loading y visibilidad de contraseña
   const [loading, setLoading] = useState(false);
@@ -48,6 +34,19 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
     company_id: null, // Empresa a asignar (si rol=4)
   });
 
+  const fetchPositions = async () => {
+    try {
+      const resp = await axios.get(`${apiUrl}/positions`, {
+        headers: { Authorization: `Bearer ${auth.token}` },
+      });
+      if (resp.data.status === "success") {
+        setPositions(resp.data.data || []);
+      }
+    } catch (error) {
+      console.error("Error fetching positions:", error);
+    }
+  };
+
   // Efecto: Cargar roles y empresas al abrir el modal
   useEffect(() => {
     if (visible) {
@@ -57,7 +56,7 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
         password: "12345678",
         rol_id: null,
         whatsapp: "",
-        position: "",
+        positionId: null,
         company_id: null,
       });
       setOpenPassword(false);
@@ -65,6 +64,7 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
 
       fetchRoles();
       fetchCompanies();
+      fetchPositions();
     }
     // eslint-disable-next-line
   }, [visible]);
@@ -148,7 +148,7 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
           name: formData.name,
           email: formData.email,
           phone: formData.whatsapp,
-          position: formData.position || "Empleado",
+          positionId: formData.position ?? undefined, // numérico
           password: formData.password,
         };
         const resp = await axios.post(
@@ -287,15 +287,15 @@ const CreateUserModal = ({ visible, onCancel, onSuccess }) => {
             </div>
 
             <div>
-              <label>Puesto (opcional):</label>
+              <label>Puesto:</label>
               <Select
                 style={{ width: "100%" }}
                 placeholder="Selecciona un puesto"
-                value={formData.position}
-                onChange={(val) => handleChange("position", val)}
+                value={formData.positionId}
+                onChange={(val) => handleChange("positionId", val)}
               >
-                {positionsCatalog.map((p) => (
-                  <Select.Option key={p.id} value={p.nombre}>
+                {positions.map((p) => (
+                  <Select.Option key={p.id} value={p.id}>
                     {p.nombre}
                   </Select.Option>
                 ))}

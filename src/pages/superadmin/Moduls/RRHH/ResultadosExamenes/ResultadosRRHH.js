@@ -170,6 +170,30 @@ function ResultadosRRHH() {
       dataIndex: "puntajeOptimismo",
     },
     {
+      title: "Ética",
+      dataIndex: "puntajeEtica",
+    },
+    {
+      title: "Inteligencia Curiosa",
+      dataIndex: "puntajeCuriosidad",
+    },
+    {
+      title: "Integridad",
+      dataIndex: "puntajeIntegridad",
+    },
+    {
+      title: "Autoconciencia",
+      dataIndex: "puntajeAutoconciencia",
+    },
+    {
+      title: "Empatía",
+      dataIndex: "puntajeEmpatia",
+    },
+    {
+      title: "Conocimientos del Puesto",
+      dataIndex: "puntajeConocimientos",
+    },
+    {
       title: "Acciones",
       render: (record) => (
         <>
@@ -325,6 +349,7 @@ function ResultadosRRHH() {
           columns={columns}
           rowKey="id"
           pagination={{ pageSize: 6 }}
+          scroll={{ x: "max-content" }} // 👈 scroll horizontal automático
         />
       )}
 
